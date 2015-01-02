@@ -43,11 +43,10 @@ func (d *descriptor) findOptDesc(s string) (*optDesc, error) {
 			}
 		}
 		return nil, ErrorSlag{message: "unknown option: " + s}
-	} else {
-		n := s[1:]
-		// TODO: implement short name detector.
-		return nil, ErrorSlag{message: "not implement short name yet: " + n}
 	}
+	// TODO: implement short name detector.
+	n := s[1:]
+	return nil, ErrorSlag{message: "not implement short name yet: " + n}
 }
 
 func (d *descriptor) call() error {
@@ -103,7 +102,7 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 		return nil, ErrorSlag{message: "required to return an error"}
 	}
 	// Extract option descriptors.
-	od := make([]optDesc, 0)
+	var od []optDesc
 	av := make([]reflect.Value, 0, len(it))
 	for _, t := range it[:il-1] {
 		v := reflect.New(t).Elem()
@@ -143,15 +142,13 @@ func Run(fn interface{}, args ...string) error {
 		if len(s) > 0 && s[0] == '-' {
 			// Parse remained as pure args after "--".
 			if s == "--" {
-				i += 1
+				i++
 				break
 			}
 			// Parse as an option.
 			o, err := d.findOptDesc(s)
 			if err != nil {
 				return err
-			} else if o == nil {
-				continue
 			}
 			n, err := o.parseValue(args[i+1:])
 			if err != nil {
