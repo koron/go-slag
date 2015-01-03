@@ -39,3 +39,20 @@ func TestError(t *testing.T) {
 		t.Error("error didn't occurred")
 	}
 }
+
+func TestInvalidReturnType(t *testing.T) {
+	fn1 := func(a ...string) int {
+		return 0
+	}
+	er1 := Run(fn1)
+	if er1 == nil || er1.Error() != "required to return an error" {
+		t.Error("a func which returns int won't be accepted")
+	}
+
+	fn2 := func(a ...string) {
+	}
+	er2 := Run(fn2)
+	if er2 == nil || er2.Error() != "required to return an error" {
+		t.Error("a func which returns none won't be accepted")
+	}
+}

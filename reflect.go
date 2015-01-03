@@ -2,6 +2,8 @@ package slag
 
 import "reflect"
 
+var errorType = reflect.TypeOf((*error)(nil)).Elem()
+
 func getTypes(t reflect.Type, n int, f func(int) reflect.Type) []reflect.Type {
 	a := make([]reflect.Type, 0, n)
 	for i := 0; i < n; i++ {
@@ -23,8 +25,7 @@ func outTypes(t reflect.Type) []reflect.Type {
 }
 
 func isErrorType(t reflect.Type) bool {
-	// TODO: implement me.
-	return true
+	return t == errorType
 }
 
 func isStringArray(t reflect.Type) bool {
