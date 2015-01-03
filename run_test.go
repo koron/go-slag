@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func isErr(err error, msg string) bool {
+	if err != nil && err.Error() == msg {
+		return true
+	}
+	return false
+}
+
 func checkRun(t *testing.T, fn interface{}, args ...string) {
 	if err := Run(fn, args...); err != nil {
 		t.Error("Run() failed:", err)
@@ -44,15 +51,29 @@ func TestInvalidReturnType(t *testing.T) {
 	fn1 := func(a ...string) int {
 		return 0
 	}
-	er1 := Run(fn1)
-	if er1 == nil || er1.Error() != "required to return an error" {
+	if !isErr(Run(fn1), "required to return an error") {
 		t.Error("a func which returns int won't be accepted")
 	}
 
 	fn2 := func(a ...string) {
 	}
-	er2 := Run(fn2)
-	if er2 == nil || er2.Error() != "required to return an error" {
+	if !isErr(Run(fn2), "required to return an error") {
 		t.Error("a func which returns none won't be accepted")
+	}
+}
+
+func TestInvalidLastArgType(t *testing.T) {
+	fn1 := func(a ...int) error {
+		return nil
+	}
+	if !isErr(Run(fn1), "required []string as last argument") {
+		t.Error("a func w/ []int as last arg, won't be accepted")
+	}
+
+	fn2 := func(a string) error {
+		return nil
+	}
+	if !isErr(Run(fn2), "required []string as last argument") {
+		t.Error("a func w/ string as last arg, won't be accepted")
 	}
 }

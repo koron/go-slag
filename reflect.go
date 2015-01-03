@@ -29,6 +29,13 @@ func isErrorType(t reflect.Type) bool {
 }
 
 func isStringArray(t reflect.Type) bool {
-	// TODO: implement me.
+	if t.Kind() != reflect.Slice {
+		// Not a slice
+		return false
+	}
+	if t.Elem().Kind() != reflect.String {
+		// Not a string in slice.
+		return false
+	}
 	return true
 }
