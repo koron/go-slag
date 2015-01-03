@@ -1,6 +1,9 @@
 package slag
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func checkRun(t *testing.T, fn interface{}, args ...string) {
 	if err := Run(fn, args...); err != nil {
@@ -25,5 +28,14 @@ func TestBool(t *testing.T) {
 	checkRun(t, fn)
 	if verbose != false {
 		t.Error("verbose should be false: without --verbose")
+	}
+}
+
+func TestError(t *testing.T) {
+	fn := func(a ...string) error {
+		return errors.New("PLANNED ERROR")
+	}
+	if err := Run(fn); err == nil || err.Error() != "PLANNED ERROR" {
+		t.Error("error didn't occurred")
 	}
 }

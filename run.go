@@ -13,8 +13,8 @@ type optDesc struct {
 }
 
 func (o *optDesc) parseValue([]string) (used int, err error) {
-	// TODO: implement me.
 	k := o.valueRef.Kind()
+	// TODO: Support other types.
 	switch k {
 	case reflect.Bool:
 		o.valueRef.SetBool(true)
@@ -36,32 +36,46 @@ func (d *descriptor) appendRemain(s string) {
 
 func (d *descriptor) findOptDesc(s string) (*optDesc, error) {
 	if len(s) >= 2 && s[:2] == "--" {
+		// Find optDesc with (long) name.
 		n := s[2:]
-		for _, o := range d.descs {
-			if n == o.name {
-				return &o, nil
+		if n != "" {
+			for _, o := range d.descs {
+				if n == o.name {
+					return &o, nil
+				}
 			}
 		}
 		return nil, ErrorSlag{message: "unknown option: " + s}
 	}
-	// TODO: implement short name detector.
+	// Find option with short name.
 	n := s[1:]
-	return nil, ErrorSlag{message: "not implement short name yet: " + n}
+	if n != "" {
+		for _, o := range d.descs {
+			if n == o.shortName {
+				return &o, nil
+			}
+		}
+	}
+	return nil, ErrorSlag{message: "unknown option (short): " + s}
 }
 
 func (d *descriptor) call() error {
-	_ = d.funcValue.Call(d.argValues)
-	// TODO: parse r as error.
-	return nil
+	rv := d.funcValue.Call(d.argValues)
+	// Parse returned as error.
+	v := rv[0].Interface()
+	if v == nil {
+		return nil
+	}
+	return v.(error)
 }
 
 func optionName(s string) string {
-	// TODO: generate (regular) name.
+	// TODO: generate (regular/snake case) name.
 	return strings.ToLower(s)
 }
 
 func optionShortName(od []optDesc, s string) string {
-	// TODO: generate short name.
+	// TODO: generate/find short name usable.
 	return ""
 }
 
@@ -73,7 +87,7 @@ func checkField(od []optDesc, f reflect.StructField) (name, shortName string, er
 		}
 	}
 	sn := optionShortName(od, strings.ToLower(f.Name))
-	// TODO: check f.Type is supported type or not.
+	// TODO: check f.Type is supported or not.
 	return n, sn, nil
 }
 
