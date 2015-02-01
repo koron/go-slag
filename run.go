@@ -14,7 +14,7 @@ type optDesc struct {
 
 func (o *optDesc) parseValue([]string) (used int, err error) {
 	k := o.valueRef.Kind()
-	// TODO: Support other types.
+	// TODO: support other types.
 	switch k {
 	case reflect.Bool:
 		o.valueRef.SetBool(true)
