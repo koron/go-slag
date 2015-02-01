@@ -17,51 +17,6 @@ func (o *optDesc) parseValue(args []string) (used int, err error) {
 	return o.converter(args, o.valueRef)
 }
 
-type descriptor struct {
-	funcValue reflect.Value
-	descs     []optDesc
-	argValues []reflect.Value
-}
-
-func (d *descriptor) appendRemain(s string) {
-	d.argValues = append(d.argValues, reflect.ValueOf(s))
-}
-
-func (d *descriptor) findOptDesc(s string) (*optDesc, error) {
-	if len(s) >= 2 && s[:2] == "--" {
-		// Find optDesc with (long) name.
-		n := s[2:]
-		if n != "" {
-			for _, o := range d.descs {
-				if n == o.name {
-					return &o, nil
-				}
-			}
-		}
-		return nil, ErrorSlag{message: "unknown option: " + s}
-	}
-	// Find option with short name.
-	n := s[1:]
-	if n != "" {
-		for _, o := range d.descs {
-			if n == o.shortName {
-				return &o, nil
-			}
-		}
-	}
-	return nil, ErrorSlag{message: "unknown option (short): " + s}
-}
-
-func (d *descriptor) call() error {
-	rv := d.funcValue.Call(d.argValues)
-	// Parse returned as error.
-	v := rv[0].Interface()
-	if v == nil {
-		return nil
-	}
-	return v.(error)
-}
-
 func optionName(s string) string {
 	// TODO: generate (regular/snake case) name.
 	return strings.ToLower(s)
@@ -105,7 +60,7 @@ func validateFunc(funcValue reflect.Value) (argTypes []reflect.Type, err error) 
 	return it, nil
 }
 
-func parseFunc(fn interface{}) (*descriptor, error) {
+func parseFunc(fn interface{}) (*funcDesc, error) {
 	// Assure fn is a func.
 	fv := reflect.ValueOf(fn)
 	if fv.Kind() != reflect.Func {
@@ -145,7 +100,7 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 			od = append(od, d)
 		}
 	}
-	return &descriptor{
+	return &funcDesc{
 		funcValue: fv,
 		descs:     od,
 		argValues: av,
@@ -154,38 +109,12 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 
 // Run execute fn with parsed args.
 func Run(fn interface{}, args ...string) error {
-	d, err := parseFunc(fn)
+	fd, err := parseFunc(fn)
 	if err != nil {
 		return err
 	}
-	// Parse args.
-	i := 0
-	for ; i < len(args); i++ {
-		s := args[i]
-		if len(s) > 0 && s[0] == '-' {
-			// Parse remained as pure args after "--".
-			if s == "--" {
-				i++
-				break
-			}
-			// Parse as an option.
-			o, err := d.findOptDesc(s)
-			if err != nil {
-				return err
-			}
-			n, err := o.parseValue(args[i+1:])
-			if err != nil {
-				return err
-			}
-			if n > 0 {
-				i += n
-			}
-		} else {
-			d.appendRemain(s)
-		}
+	if err := fd.parseArgs(args); err != nil {
+		return err
 	}
-	for ; i < len(args); i++ {
-		d.appendRemain(args[i])
-	}
-	return d.call()
+	return fd.call()
 }
