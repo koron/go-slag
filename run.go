@@ -91,14 +91,9 @@ func checkField(od []optDesc, f reflect.StructField) (name, shortName string, er
 	return n, sn, nil
 }
 
-func parseFunc(fn interface{}) (*descriptor, error) {
-	// Assure fn is a func.
-	fv := reflect.ValueOf(fn)
-	if fv.Kind() != reflect.Func {
-		return nil, ErrorSlag{message: "required a function"}
-	}
-	// Check types of argument and return of function.
-	ft := fv.Type()
+// validateFunc checks type of arguments and return value of function.
+func validateFunc(funcValue reflect.Value) (argTypes []reflect.Type, err error) {
+	ft := funcValue.Type()
 	it := inTypes(ft)
 	ot := outTypes(ft)
 	il := len(it)
@@ -115,10 +110,24 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 	if len(ot) != 1 || !isErrorType(ot[0]) {
 		return nil, ErrorSlag{message: "required to return an error"}
 	}
+	return it, nil
+}
+
+func parseFunc(fn interface{}) (*descriptor, error) {
+	// Assure fn is a func.
+	fv := reflect.ValueOf(fn)
+	if fv.Kind() != reflect.Func {
+		return nil, ErrorSlag{message: "required a function"}
+	}
+	// Check types of arguments and return value of function.
+	it, err := validateFunc(fv)
+	if err != nil {
+		return nil, err
+	}
 	// Extract option descriptors.
 	var od []optDesc
 	av := make([]reflect.Value, 0, len(it))
-	for _, t := range it[:il-1] {
+	for _, t := range it[:len(it)-1] {
 		v := reflect.New(t).Elem()
 		av = append(av, v)
 		for j := 0; j < t.NumField(); j++ {
