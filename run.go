@@ -10,6 +10,7 @@ type optDesc struct {
 	name      string
 	shortName string
 	valueRef  *reflect.Value
+	converter converter
 }
 
 func (o *optDesc) parseValue([]string) (used int, err error) {
@@ -22,6 +23,10 @@ func (o *optDesc) parseValue([]string) (used int, err error) {
 		return 0, ErrorSlag{message: "not supported kind: " + k.String()}
 	}
 	return 0, nil
+}
+
+func (o *optDesc) parseValue2(args []string) (used int, err error) {
+	return o.converter.convert(args, o.valueRef)
 }
 
 type descriptor struct {
