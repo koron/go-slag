@@ -122,6 +122,7 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 	for _, t := range it[:len(it)-1] {
 		v := reflect.New(t).Elem()
 		av = append(av, v)
+		// collect optDesc to od.
 		for j := 0; j < t.NumField(); j++ {
 			f := t.Field(j)
 			n, sn, err := checkField(od, f)
