@@ -10,18 +10,11 @@ type optDesc struct {
 	name      string
 	shortName string
 	valueRef  *reflect.Value
+	converter converter
 }
 
-func (o *optDesc) parseValue([]string) (used int, err error) {
-	k := o.valueRef.Kind()
-	// TODO: support other types.
-	switch k {
-	case reflect.Bool:
-		o.valueRef.SetBool(true)
-	default:
-		return 0, ErrorSlag{message: "not supported kind: " + k.String()}
-	}
-	return 0, nil
+func (o *optDesc) parseValue(args []string) (used int, err error) {
+	return o.converter(args, o.valueRef)
 }
 
 type descriptor struct {
@@ -87,7 +80,6 @@ func checkField(od []optDesc, f reflect.StructField) (name, shortName string, er
 		}
 	}
 	sn := optionShortName(od, strings.ToLower(f.Name))
-	// TODO: check f.Type is supported or not.
 	return n, sn, nil
 }
 
@@ -136,11 +128,18 @@ func parseFunc(fn interface{}) (*descriptor, error) {
 			if err != nil {
 				return nil, err
 			}
+			// check f.Type is supported or not.
+			c, err := findConverter(f.Type)
+			if err != nil {
+				return nil, err
+			}
+			// compose option descriptor
 			vf := v.Field(j)
 			d := optDesc{
 				name:      n,
 				shortName: sn,
 				valueRef:  &vf,
+				converter: c,
 			}
 			od = append(od, d)
 		}
