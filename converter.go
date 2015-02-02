@@ -2,7 +2,7 @@ package slag
 
 import "reflect"
 
-type converter func(args []string, dest *reflect.Value) (used int, err error)
+type converter func(d *optDesc, args []string) (used int, err error)
 
 func findConverter(t reflect.Type) (c converter, err error) {
 	k := t.Kind()
@@ -18,16 +18,15 @@ func findConverter(t reflect.Type) (c converter, err error) {
 	return
 }
 
-func boolConverter(args []string, dest *reflect.Value) (used int, err error) {
-	dest.SetBool(true)
+func boolConverter(d *optDesc, args []string) (used int, err error) {
+	d.valueRef.SetBool(true)
 	return 0, nil
 }
 
-func stringConverter(args []string, dest *reflect.Value) (used int, err error) {
+func stringConverter(d *optDesc, args []string) (used int, err error) {
 	if len(args) < 1 {
-		// TODO: better error message.
-		return 0, ErrorSlag{message: "need one argument"}
+		return 0, d.errorNeedArgument()
 	}
-	dest.SetString(args[0])
+	d.valueRef.SetString(args[0])
 	return 1, nil
 }

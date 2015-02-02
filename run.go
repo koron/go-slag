@@ -6,17 +6,6 @@ import (
 	"strings"
 )
 
-type optDesc struct {
-	name      string
-	shortName string
-	valueRef  *reflect.Value
-	converter converter
-}
-
-func (o *optDesc) parseValue(args []string) (used int, err error) {
-	return o.converter(args, o.valueRef)
-}
-
 func optionName(s string) string {
 	// TODO: generate (regular/snake case) name.
 	return strings.ToLower(s)
