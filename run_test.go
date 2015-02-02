@@ -38,6 +38,26 @@ func TestBool(t *testing.T) {
 	}
 }
 
+func TestString(t *testing.T) {
+	name := ""
+	fn := func(o struct{ Name string }, a ...string) error {
+		name = o.Name
+		return nil
+	}
+	checkRun(t, fn)
+	if name != "" {
+		t.Error("name should be empty: without --name")
+	}
+	checkRun(t, fn, "--name", "foo")
+	if name != "foo" {
+		t.Error("name should be \"foo\"")
+	}
+	checkRun(t, fn, "--name", "bar")
+	if name != "bar" {
+		t.Error("name should be \"bar\"")
+	}
+}
+
 func TestError(t *testing.T) {
 	fn := func(a ...string) error {
 		return errors.New("PLANNED ERROR")

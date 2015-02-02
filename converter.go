@@ -10,6 +10,8 @@ func findConverter(t reflect.Type) (c converter, err error) {
 	switch k {
 	case reflect.Bool:
 		return boolConverter, nil
+	case reflect.String:
+		return stringConverter, nil
 	default:
 		return nil, ErrorSlag{message: "not supported kind: " + k.String()}
 	}
@@ -19,4 +21,13 @@ func findConverter(t reflect.Type) (c converter, err error) {
 func boolConverter(args []string, dest *reflect.Value) (used int, err error) {
 	dest.SetBool(true)
 	return 0, nil
+}
+
+func stringConverter(args []string, dest *reflect.Value) (used int, err error) {
+	if len(args) < 1 {
+		// TODO: better error message.
+		return 0, ErrorSlag{message: "need one argument"}
+	}
+	dest.SetString(args[0])
+	return 1, nil
 }
