@@ -3,14 +3,20 @@ package slag
 import "unicode"
 
 func toSname(s string) string {
-	buf, pu := make([]rune, 0), false
-	for i, c := range []rune(s) {
+	t := []rune(s)
+	l := len(t)
+	buf := make([]rune, 0, l)
+	prev_low := false
+	for i, c := range t {
 		u := unicode.IsUpper(c)
-		if i > 0 && !pu && u {
-			buf = append(buf, '_')
+		if u {
+			c = unicode.ToLower(c)
+			if i > 0 && (prev_low || (i+1 < l && unicode.IsLower(t[i+1]))) {
+				buf = append(buf, '_')
+			}
 		}
-		pu = u
-		buf = append(buf, unicode.ToLower(c))
+		prev_low = !u
+		buf = append(buf, c)
 	}
 	return string(buf)
 }
