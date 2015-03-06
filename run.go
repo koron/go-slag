@@ -6,18 +6,13 @@ import (
 	"strings"
 )
 
-func optionName(s string) string {
-	// TODO: generate (regular/snake case) name.
-	return strings.ToLower(s)
-}
-
 func optionShortName(od []optDesc, s string) string {
 	// TODO: generate/find short name usable.
 	return ""
 }
 
 func checkField(od []optDesc, f reflect.StructField) (name, shortName string, err error) {
-	n := optionName(f.Name)
+	n := toSname(f.Name)
 	for _, d := range od {
 		if n == d.name {
 			return "", "", ErrorSlag{message: "duplicated option: " + n}
