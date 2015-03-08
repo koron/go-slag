@@ -3,22 +3,33 @@ package slag
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
-func optionShortName(od []optDesc, s string) string {
+type optDescs struct {
+	descs []optDesc
+	shortNames map[string]bool
+}
+
+func (ds *optDescs) add(d optDesc) {
+	ds.descs = append(ds.descs, d)
+	if d.shortName != "" {
+		ds.shortNames[d.shortName] = true
+	}
+}
+
+func (ds *optDescs) toShort(s string) string {
 	// TODO: generate/find short name usable.
 	return ""
 }
 
-func checkField(od []optDesc, f reflect.StructField) (name, shortName string, err error) {
+func (ds *optDescs) check(f reflect.StructField) (name, shortName string, err error) {
 	n := toSnake(f.Name)
-	for _, d := range od {
+	for _, d := range ds.descs {
 		if n == d.name {
 			return "", "", ErrorSlag{message: "duplicated option: " + n}
 		}
 	}
-	sn := optionShortName(od, strings.ToLower(f.Name))
+	sn := ds.toShort(f.Name)
 	return n, sn, nil
 }
 
@@ -56,15 +67,15 @@ func parseFunc(fn interface{}) (*funcDesc, error) {
 		return nil, err
 	}
 	// Extract option descriptors.
-	var od []optDesc
+	descs := &optDescs{}
 	av := make([]reflect.Value, 0, len(it))
 	for _, t := range it[:len(it)-1] {
 		v := reflect.New(t).Elem()
 		av = append(av, v)
-		// collect optDesc to od.
+		// collect optDesc to descs.
 		for j := 0; j < t.NumField(); j++ {
 			f := t.Field(j)
-			n, sn, err := checkField(od, f)
+			n, sn, err := descs.check(f)
 			if err != nil {
 				return nil, err
 			}
@@ -81,12 +92,12 @@ func parseFunc(fn interface{}) (*funcDesc, error) {
 				valueRef:  &vf,
 				converter: c,
 			}
-			od = append(od, d)
+			descs.add(d)
 		}
 	}
 	return &funcDesc{
 		funcValue: fv,
-		descs:     od,
+		descs:     descs.descs,
 		argValues: av,
 	}, nil
 }
