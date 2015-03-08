@@ -20,8 +20,8 @@ func TestToSname(t *testing.T) {
 		{"foo_bar", "foo_bar"},
 	}
 	for _, c := range tests {
-		if v := toSname(c.input); v != c.expected {
-			t.Errorf(`toSname(%#v) -> %#v != expected %#v`,
+		if v := toSnake(c.input); v != c.expected {
+			t.Errorf(`toSnake(%#v) -> %#v != expected %#v`,
 				c.input, v, c.expected)
 		}
 	}

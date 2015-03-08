@@ -2,7 +2,7 @@ package slag
 
 import "unicode"
 
-func toSname(s string) string {
+func toSnake(s string) string {
 	t := []rune(s)
 	l := len(t)
 	buf := make([]rune, 0, l)
