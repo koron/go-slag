@@ -3,10 +3,11 @@ package slag
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type optDescs struct {
-	descs []optDesc
+	descs      []optDesc
 	shortNames map[string]bool
 }
 
@@ -18,7 +19,16 @@ func (ds *optDescs) add(d optDesc) {
 }
 
 func (ds *optDescs) toShort(s string) string {
-	// TODO: generate/find short name usable.
+	for _, r := range []rune(strings.ToLower(s)) {
+		l := string(r)
+		if _, ok := ds.shortNames[l]; !ok {
+			return l
+		}
+		u := strings.ToUpper(l)
+		if _, ok := ds.shortNames[u]; !ok {
+			return u
+		}
+	}
 	return ""
 }
 
@@ -67,7 +77,9 @@ func parseFunc(fn interface{}) (*funcDesc, error) {
 		return nil, err
 	}
 	// Extract option descriptors.
-	descs := &optDescs{}
+	descs := &optDescs{
+		shortNames: make(map[string]bool),
+	}
 	av := make([]reflect.Value, 0, len(it))
 	for _, t := range it[:len(it)-1] {
 		v := reflect.New(t).Elem()
