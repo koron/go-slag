@@ -29,3 +29,9 @@ func (o *optDesc) errorNeedArgument() error {
 		message: o.displayName() + " need an argument",
 	}
 }
+
+func (o *optDesc) errorParseFailure(err error) error {
+	return ErrorSlag{
+		message: o.displayName() + " parse failure: " + err.Error(),
+	}
+}
