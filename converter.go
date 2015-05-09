@@ -37,10 +37,23 @@ func findConverter(t reflect.Type) (c converter, err error) {
 			return uintPtrConverter, nil
 		default:
 			// FIXME: better message.
-			return nil, ErrorSlag{message: "not supported kind: " + k2.String()}
+			return nil, ErrorSlag{
+				message: "not supported kind: " + k2.String(),
+			}
 		}
 
-	// TODO: support array types.
+	case reflect.Slice:
+		t2 := t.Elem()
+		switch k2 := t2.Kind(); k2 {
+		case reflect.Bool:
+			return boolSliceConverter, nil
+			// TODO: support slice types: string, int and uint.
+		default:
+			// FIXME: better message.
+			return nil, ErrorSlag{
+				message: "not supported kind: " + k2.String(),
+			}
+		}
 
 	default:
 		// FIXME: better message.
@@ -117,9 +130,6 @@ func stringPtrConverter(d *optDesc, args []string) (used int, err error) {
 		return 0, d.errorNeedArgument()
 	}
 	v := args[0]
-	if err != nil {
-		return 0, d.errorParseFailure(err)
-	}
 	pv := reflect.New(d.valueRef.Type().Elem())
 	pv.Elem().SetString(v)
 	d.valueRef.Set(pv)
@@ -151,5 +161,18 @@ func uintPtrConverter(d *optDesc, args []string) (used int, err error) {
 	pv := reflect.New(d.valueRef.Type().Elem())
 	pv.Elem().SetUint(v)
 	d.valueRef.Set(pv)
+	return 1, nil
+}
+
+func boolSliceConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v, err := strconv.ParseBool(args[0])
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	rv := reflect.ValueOf(v)
+	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
 	return 1, nil
 }

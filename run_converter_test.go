@@ -46,6 +46,34 @@ func TestBoolPtr(t *testing.T) {
 	}
 }
 
+func TestBoolSlice(t *testing.T) {
+	var flags []bool
+	fn := func(o struct{ Flags []bool }, a ...string) error {
+		flags = o.Flags
+		return nil
+	}
+	checkRun(t, fn)
+	if len(flags) != 0 {
+		t.Error("flags should be empty: without --flags")
+	}
+	checkRun(t, fn, "-f", "t", "-f", "t")
+	if len(flags) != 2 || flags[0] != true || flags[1] != true {
+		t.Errorf("flags should be {true, true}: %#v", flags)
+	}
+	checkRun(t, fn, "-f", "t", "-f", "f")
+	if len(flags) != 2 || flags[0] != true || flags[1] != false {
+		t.Errorf("flags should be {true, false}: %#v", flags)
+	}
+	checkRun(t, fn, "-f", "f", "-f", "t")
+	if len(flags) != 2 || flags[0] != false || flags[1] != true {
+		t.Errorf("flags should be {true, false}: %#v", flags)
+	}
+	checkRun(t, fn, "-f", "f", "-f", "f")
+	if len(flags) != 2 || flags[0] != false || flags[1] != false {
+		t.Errorf("flags should be {true, false}: %#v", flags)
+	}
+}
+
 func TestString(t *testing.T) {
 	name := ""
 	fn := func(o struct{ Name string }, a ...string) error {
