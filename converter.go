@@ -21,12 +21,14 @@ func findConverter(t reflect.Type) (c converter, err error) {
 		return uintConverter, nil
 	case reflect.Float32, reflect.Float64:
 		return floatConverter, nil
-	// TODO: support pointer types.
 	case reflect.Ptr:
 		t2 := t.Elem()
 		switch k2 := t2.Kind(); k2 {
 		case reflect.Bool:
 			return boolPtrConverter, nil
+		case reflect.String:
+			return stringPtrConverter, nil
+		// TODO: more pointer types.
 		default:
 			return nil, ErrorSlag{message: "not supported kind: " + k2.String()}
 		}
@@ -94,8 +96,22 @@ func boolPtrConverter(d *optDesc, args []string) (used int, err error) {
 	if err != nil {
 		return 0, d.errorParseFailure(err)
 	}
-	pv := reflect.New(reflect.TypeOf(v))
+	pv := reflect.New(d.valueRef.Type().Elem())
 	pv.Elem().SetBool(v)
 	d.valueRef.Set(pv)
-	return 0, nil
+	return 1, nil
+}
+
+func stringPtrConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v := args[0]
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	pv := reflect.New(d.valueRef.Type().Elem())
+	pv.Elem().SetString(v)
+	d.valueRef.Set(pv)
+	return 1, nil
 }

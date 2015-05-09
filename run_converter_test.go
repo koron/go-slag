@@ -66,6 +66,26 @@ func TestString(t *testing.T) {
 	}
 }
 
+func TestStringPtr(t *testing.T) {
+	var name *string
+	fn := func(o struct{ Name *string }, a ...string) error {
+		name = o.Name
+		return nil
+	}
+	checkRun(t, fn)
+	if name != nil {
+		t.Error("name should be nil: without --name")
+	}
+	checkRun(t, fn, "--name", "foo")
+	if name == nil || *name != "foo" {
+		t.Error("*name should be \"foo\"")
+	}
+	checkRun(t, fn, "--name", "bar")
+	if name == nil || *name != "bar" {
+		t.Error("*name should be \"bar\"")
+	}
+}
+
 func TestInt(t *testing.T) {
 	num := 0
 	fn := func(o struct{ Number int }, a ...string) error {
