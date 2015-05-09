@@ -125,3 +125,6 @@ func TestInt64(t *testing.T) {
 		t.Error("num should be -273")
 	}
 }
+
+// TODO: test uint conveter
+// TODO: test int/uint pointer conveter
