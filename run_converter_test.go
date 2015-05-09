@@ -22,6 +22,30 @@ func TestBool(t *testing.T) {
 	}
 }
 
+func TestBoolPtr(t *testing.T) {
+	var flag *bool
+	fn := func(o struct{ Flag *bool }, a ...string) error {
+		flag = o.Flag
+		return nil
+	}
+	checkRun(t, fn)
+	if flag != nil {
+		t.Error("flag should be nil: without --flag")
+	}
+	checkRun(t, fn, "--flag", "t")
+	if flag == nil || *flag == false {
+		t.Error("flag should be pointer to true")
+	}
+	checkRun(t, fn, "--flag", "f")
+	if flag == nil || *flag == true {
+		t.Error("flag should be pointer to false")
+	}
+	checkRun(t, fn)
+	if flag != nil {
+		t.Error("flag should be nil: without --flag (2nd)")
+	}
+}
+
 func TestString(t *testing.T) {
 	name := ""
 	fn := func(o struct{ Name string }, a ...string) error {

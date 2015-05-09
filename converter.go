@@ -8,8 +8,7 @@ import (
 type converter func(d *optDesc, args []string) (used int, err error)
 
 func findConverter(t reflect.Type) (c converter, err error) {
-	k := t.Kind()
-	switch k {
+	switch k := t.Kind(); k {
 	case reflect.Bool:
 		return boolConverter, nil
 	case reflect.String:
@@ -23,6 +22,14 @@ func findConverter(t reflect.Type) (c converter, err error) {
 	case reflect.Float32, reflect.Float64:
 		return floatConverter, nil
 	// TODO: support pointer types.
+	case reflect.Ptr:
+		t2 := t.Elem()
+		switch k2 := t2.Kind(); k2 {
+		case reflect.Bool:
+			return boolPtrConverter, nil
+		default:
+			return nil, ErrorSlag{message: "not supported kind: " + k2.String()}
+		}
 	// TODO: support array types.
 	default:
 		return nil, ErrorSlag{message: "not supported kind: " + k.String()}
@@ -77,4 +84,18 @@ func floatConverter(d *optDesc, args []string) (used int, err error) {
 	}
 	d.valueRef.SetFloat(v)
 	return 1, nil
+}
+
+func boolPtrConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v, err := strconv.ParseBool(args[0])
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	pv := reflect.New(reflect.TypeOf(v))
+	pv.Elem().SetBool(v)
+	d.valueRef.Set(pv)
+	return 0, nil
 }
