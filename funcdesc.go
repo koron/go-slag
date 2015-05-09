@@ -1,6 +1,9 @@
 package slag
 
-import "reflect"
+import (
+	"io"
+	"reflect"
+)
 
 type funcDesc struct {
 	funcValue reflect.Value
@@ -77,4 +80,8 @@ func (fd *funcDesc) call() error {
 		return nil
 	}
 	return v.(error)
+}
+
+func (fd *funcDesc) help(w io.Writer) {
+	// TODO: show help
 }
