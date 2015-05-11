@@ -205,7 +205,7 @@ func intSliceConverter(d *optDesc, args []string) (used int, err error) {
 	if err != nil {
 		return 0, d.errorParseFailure(err)
 	}
-	rv := reflect.ValueOf(v)
+	rv := reflect.ValueOf(v).Convert(d.valueRef.Type().Elem())
 	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
 	return 1, nil
 }
@@ -218,7 +218,7 @@ func uintSliceConverter(d *optDesc, args []string) (used int, err error) {
 	if err != nil {
 		return 0, d.errorParseFailure(err)
 	}
-	rv := reflect.ValueOf(v)
+	rv := reflect.ValueOf(v).Convert(d.valueRef.Type().Elem())
 	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
 	return 1, nil
 }
