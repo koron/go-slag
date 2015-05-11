@@ -174,5 +174,44 @@ func TestStringPtr(t *testing.T) {
 	}
 }
 
-// TODO: test pointer conveters (int, uint)
+func TestIntPtr(t *testing.T) {
+	var value *int
+	fn := func(o struct{ Value *int }, a ...string) error {
+		value = o.Value
+		return nil
+	}
+	checkRun(t, fn)
+	if value != nil {
+		t.Error("value should be nil without -v")
+	}
+	checkRun(t, fn, "-v", "123")
+	if value == nil || *value != 123 {
+		t.Error("*value should be 123")
+	}
+	checkRun(t, fn, "-v", "-999999999")
+	if value == nil || *value != -999999999 {
+		t.Error("*value should be -999999999")
+	}
+}
+
+func TestUintPtr(t *testing.T) {
+	var value *uint
+	fn := func(o struct{ Value *uint }, a ...string) error {
+		value = o.Value
+		return nil
+	}
+	checkRun(t, fn)
+	if value != nil {
+		t.Error("value should be nil without -v")
+	}
+	checkRun(t, fn, "-v", "123")
+	if value == nil || *value != 123 {
+		t.Error("*value should be 123")
+	}
+	checkRun(t, fn, "-v", "999999999")
+	if value == nil || *value != 999999999 {
+		t.Error("*value should be 999999999")
+	}
+}
+
 // TODO: test slice converters (string, int, uint)
