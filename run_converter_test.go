@@ -22,30 +22,6 @@ func TestBool(t *testing.T) {
 	}
 }
 
-func TestBoolPtr(t *testing.T) {
-	var flag *bool
-	fn := func(o struct{ Flag *bool }, a ...string) error {
-		flag = o.Flag
-		return nil
-	}
-	checkRun(t, fn)
-	if flag != nil {
-		t.Error("flag should be nil: without --flag")
-	}
-	checkRun(t, fn, "--flag", "t")
-	if flag == nil || *flag == false {
-		t.Error("flag should be pointer to true")
-	}
-	checkRun(t, fn, "--flag", "f")
-	if flag == nil || *flag == true {
-		t.Error("flag should be pointer to false")
-	}
-	checkRun(t, fn)
-	if flag != nil {
-		t.Error("flag should be nil: without --flag (2nd)")
-	}
-}
-
 func TestBoolSlice(t *testing.T) {
 	var flags []bool
 	fn := func(o struct{ Flags []bool }, a ...string) error {
@@ -94,26 +70,6 @@ func TestString(t *testing.T) {
 	}
 }
 
-func TestStringPtr(t *testing.T) {
-	var name *string
-	fn := func(o struct{ Name *string }, a ...string) error {
-		name = o.Name
-		return nil
-	}
-	checkRun(t, fn)
-	if name != nil {
-		t.Error("name should be nil: without --name")
-	}
-	checkRun(t, fn, "--name", "foo")
-	if name == nil || *name != "foo" {
-		t.Error("*name should be \"foo\"")
-	}
-	checkRun(t, fn, "--name", "bar")
-	if name == nil || *name != "bar" {
-		t.Error("*name should be \"bar\"")
-	}
-}
-
 func TestInt(t *testing.T) {
 	num := 0
 	fn := func(o struct{ Number int }, a ...string) error {
@@ -154,5 +110,69 @@ func TestInt64(t *testing.T) {
 	}
 }
 
-// TODO: test uint conveter
-// TODO: test int/uint pointer conveter
+func TestUint(t *testing.T) {
+	var num uint64
+	fn := func(o struct{ Number uint64 }, a ...string) error {
+		num = o.Number
+		return nil
+	}
+	checkRun(t, fn)
+	if num != 0 {
+		t.Error("num should be zero without -n")
+	}
+	checkRun(t, fn, "-n", "42")
+	if num != 42 {
+		t.Error("num should be 42")
+	}
+	checkRun(t, fn, "-n", "999999")
+	if num != 999999 {
+		t.Error("num should be 999999")
+	}
+}
+
+func TestBoolPtr(t *testing.T) {
+	var flag *bool
+	fn := func(o struct{ Flag *bool }, a ...string) error {
+		flag = o.Flag
+		return nil
+	}
+	checkRun(t, fn)
+	if flag != nil {
+		t.Error("flag should be nil: without --flag")
+	}
+	checkRun(t, fn, "--flag", "t")
+	if flag == nil || *flag == false {
+		t.Error("flag should be pointer to true")
+	}
+	checkRun(t, fn, "--flag", "f")
+	if flag == nil || *flag == true {
+		t.Error("flag should be pointer to false")
+	}
+	checkRun(t, fn)
+	if flag != nil {
+		t.Error("flag should be nil: without --flag (2nd)")
+	}
+}
+
+func TestStringPtr(t *testing.T) {
+	var name *string
+	fn := func(o struct{ Name *string }, a ...string) error {
+		name = o.Name
+		return nil
+	}
+	checkRun(t, fn)
+	if name != nil {
+		t.Error("name should be nil: without --name")
+	}
+	checkRun(t, fn, "--name", "foo")
+	if name == nil || *name != "foo" {
+		t.Error("*name should be \"foo\"")
+	}
+	checkRun(t, fn, "--name", "bar")
+	if name == nil || *name != "bar" {
+		t.Error("*name should be \"bar\"")
+	}
+}
+
+// TODO: test pointer conveters (int, uint)
+// TODO: test slice converters (string, int, uint)
