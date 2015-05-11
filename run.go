@@ -98,6 +98,7 @@ func parseFunc(fn interface{}) (*funcDesc, error) {
 			}
 			// compose option descriptor
 			vf := v.Field(j)
+			// TODO: parse f.Tag and extract info: desc, default or so.
 			d := optDesc{
 				name:      n,
 				shortName: sn,
