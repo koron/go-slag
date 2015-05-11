@@ -6,16 +6,16 @@ func toSnake(s string) string {
 	t := []rune(s)
 	l := len(t)
 	buf := make([]rune, 0, l)
-	prev_low := false
+	prevLow := false
 	for i, c := range t {
 		u := unicode.IsUpper(c)
 		if u {
 			c = unicode.ToLower(c)
-			if i > 0 && (prev_low || (i+1 < l && unicode.IsLower(t[i+1]))) {
+			if i > 0 && (prevLow || (i+1 < l && unicode.IsLower(t[i+1]))) {
 				buf = append(buf, '_')
 			}
 		}
-		prev_low = !u
+		prevLow = !u
 		buf = append(buf, c)
 	}
 	return string(buf)

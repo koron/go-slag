@@ -135,7 +135,7 @@ func TestInt(t *testing.T) {
 }
 
 func TestInt64(t *testing.T) {
-	var num int64 = 0
+	var num int64
 	fn := func(o struct{ Number int64 }, a ...string) error {
 		num = o.Number
 		return nil

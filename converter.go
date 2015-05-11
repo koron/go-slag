@@ -47,7 +47,14 @@ func findConverter(t reflect.Type) (c converter, err error) {
 		switch k2 := t2.Kind(); k2 {
 		case reflect.Bool:
 			return boolSliceConverter, nil
-			// TODO: support slice types: string, int and uint.
+		case reflect.String:
+			return stringSliceConverter, nil
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
+			reflect.Int64:
+			return intSliceConverter, nil
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
+			reflect.Uint64:
+			return uintSliceConverter, nil
 		default:
 			// FIXME: better message.
 			return nil, ErrorSlag{
@@ -169,6 +176,45 @@ func boolSliceConverter(d *optDesc, args []string) (used int, err error) {
 		return 0, d.errorNeedArgument()
 	}
 	v, err := strconv.ParseBool(args[0])
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	rv := reflect.ValueOf(v)
+	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
+	return 1, nil
+}
+
+func stringSliceConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v := args[0]
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	rv := reflect.ValueOf(v)
+	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
+	return 1, nil
+}
+
+func intSliceConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v, err := strconv.ParseInt(args[0], 0, 64)
+	if err != nil {
+		return 0, d.errorParseFailure(err)
+	}
+	rv := reflect.ValueOf(v)
+	d.valueRef.Set(reflect.Append(*d.valueRef, rv))
+	return 1, nil
+}
+
+func uintSliceConverter(d *optDesc, args []string) (used int, err error) {
+	if len(args) < 1 {
+		return 0, d.errorNeedArgument()
+	}
+	v, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
 		return 0, d.errorParseFailure(err)
 	}
