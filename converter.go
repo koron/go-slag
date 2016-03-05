@@ -23,50 +23,55 @@ func findConverter(t reflect.Type) (c converter, err error) {
 		return floatConverter, nil
 
 	case reflect.Ptr:
-		t2 := t.Elem()
-		switch k2 := t2.Kind(); k2 {
-		case reflect.Bool:
-			return boolPtrConverter, nil
-		case reflect.String:
-			return stringPtrConverter, nil
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
-			reflect.Int64:
-			return intPtrConverter, nil
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
-			reflect.Uint64:
-			return uintPtrConverter, nil
-		default:
-			// FIXME: better message.
-			return nil, ErrorSlag{
-				message: "not supported kind: " + k2.String(),
-			}
-		}
+		return findPtrConverter(t.Elem())
 
 	case reflect.Slice:
-		t2 := t.Elem()
-		switch k2 := t2.Kind(); k2 {
-		case reflect.Bool:
-			return boolSliceConverter, nil
-		case reflect.String:
-			return stringSliceConverter, nil
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
-			reflect.Int64:
-			return intSliceConverter, nil
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
-			reflect.Uint64:
-			return uintSliceConverter, nil
-		default:
-			// FIXME: better message.
-			return nil, ErrorSlag{
-				message: "not supported kind: " + k2.String(),
-			}
-		}
+		return findSliceConverter(t.Elem())
 
 	default:
 		// FIXME: better message.
 		return nil, ErrorSlag{message: "not supported kind: " + k.String()}
 	}
-	return
+}
+
+func findPtrConverter(t reflect.Type) (c converter, err error) {
+	switch k := t.Kind(); k {
+	case reflect.Bool:
+		return boolPtrConverter, nil
+	case reflect.String:
+		return stringPtrConverter, nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
+		reflect.Int64:
+		return intPtrConverter, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
+		reflect.Uint64:
+		return uintPtrConverter, nil
+	default:
+		// FIXME: better message.
+		return nil, ErrorSlag{
+			message: "not supported kind: " + k.String(),
+		}
+	}
+}
+
+func findSliceConverter(t reflect.Type) (c converter, err error) {
+	switch k := t.Kind(); k {
+	case reflect.Bool:
+		return boolSliceConverter, nil
+	case reflect.String:
+		return stringSliceConverter, nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
+		reflect.Int64:
+		return intSliceConverter, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
+		reflect.Uint64:
+		return uintSliceConverter, nil
+	default:
+		// FIXME: better message.
+		return nil, ErrorSlag{
+			message: "not supported kind: " + k.String(),
+		}
+	}
 }
 
 func boolConverter(d *optDesc, args []string) (used int, err error) {
