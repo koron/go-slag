@@ -45,12 +45,12 @@ func parseFuncDesc(fn interface{}) (*funcDesc, error) {
 			}
 			// compose option descriptor
 			vf := v.Field(j)
-			// TODO: parse f.Tag and extract info: desc, default or so.
 			d := optDesc{
 				name:      n,
 				shortName: sn,
 				valueRef:  &vf,
 				converter: c,
+				usage:     f.Tag.Get("slag"),
 			}
 			descs.add(d)
 		}
@@ -134,6 +134,23 @@ func (fd *funcDesc) call() error {
 }
 
 func (fd *funcDesc) help(w io.Writer) {
+	if len(fd.descs) == 0 {
+		fmt.Fprintln(w, "(NO OPTIONS)")
+		return
+	}
+	fmt.Fprintln(w, "OPTIONS:")
+	for _, d := range fd.descs {
+		s := "  " + d.displayName()
+		if len(d.usage) > 0 {
+			if len(s) <= 4 {
+				s += "\t"
+			} else {
+				s += "\n    \t"
+			}
+			s += d.usage
+		}
+		fmt.Fprintln(w, s)
+	}
 	// TODO: show help
 }
 

@@ -10,6 +10,7 @@ type optDesc struct {
 	shortName string
 	valueRef  *reflect.Value
 	converter converter
+	usage     string
 }
 
 func (o *optDesc) parseValue(args []string) (used int, err error) {
@@ -73,5 +74,8 @@ func (ds *optDescs) check(f reflect.StructField) (name, shortName string, err er
 		}
 	}
 	sn := ds.toShort(f.Name)
+	if sn == n {
+		n = ""
+	}
 	return n, sn, nil
 }
