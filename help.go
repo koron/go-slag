@@ -4,7 +4,7 @@ import "os"
 
 // Help prints help to os.Stdout
 func Help(fn interface{}) error {
-	fd, err := parseFunc(fn)
+	fd, err := parseFuncDesc(fn)
 	if err != nil {
 		return err
 	}

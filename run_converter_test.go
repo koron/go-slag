@@ -197,21 +197,13 @@ func TestBoolSlice(t *testing.T) {
 		t.Error("flags should be empty: without --flags")
 	}
 	checkRun(t, fn, "-f", "t", "-f", "t")
-	if len(flags) != 2 || flags[0] != true || flags[1] != true {
-		t.Errorf("flags should be {true, true}: %#v", flags)
-	}
+	assertBools(t, flags, []bool{true, true})
 	checkRun(t, fn, "-f", "t", "-f", "f")
-	if len(flags) != 2 || flags[0] != true || flags[1] != false {
-		t.Errorf("flags should be {true, false}: %#v", flags)
-	}
+	assertBools(t, flags, []bool{true, false})
 	checkRun(t, fn, "-f", "f", "-f", "t")
-	if len(flags) != 2 || flags[0] != false || flags[1] != true {
-		t.Errorf("flags should be {true, false}: %#v", flags)
-	}
+	assertBools(t, flags, []bool{false, true})
 	checkRun(t, fn, "-f", "f", "-f", "f")
-	if len(flags) != 2 || flags[0] != false || flags[1] != false {
-		t.Errorf("flags should be {true, false}: %#v", flags)
-	}
+	assertBools(t, flags, []bool{false, false})
 }
 
 func TestStringSlice(t *testing.T) {
@@ -225,13 +217,9 @@ func TestStringSlice(t *testing.T) {
 		t.Error("slice should be empty without -v")
 	}
 	checkRun(t, fn, "-v", "foo", "-v", "bar")
-	if len(s) != 2 || s[0] != "foo" || s[1] != "bar" {
-		t.Errorf("slice should be %#v: %#v", []string{"foo", "bar"}, s)
-	}
+	assertStrings(t, s, []string{"foo", "bar"})
 	checkRun(t, fn, "-v", "aa", "-v", "bb", "-v", "cc")
-	if len(s) != 3 || s[0] != "aa" || s[1] != "bb" || s[2] != "cc" {
-		t.Errorf("slice should be %#v: %#v", []string{"aa", "bb", "cc"}, s)
-	}
+	assertStrings(t, s, []string{"aa", "bb", "cc"})
 }
 
 func TestIntSlice(t *testing.T) {
